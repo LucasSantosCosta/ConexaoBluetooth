@@ -11,7 +11,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,11 +39,11 @@ public class MainActivity extends AppCompatActivity {
         adapter.add("Selecione um dispositivo");
 
         //O aparelho tem bluetooth?
-        if (bluetooth != null){
+        if (bluetooth != null) {
 
             // Bluetooth não está ativo?
             //Manda ativar...
-            if (!bluetooth.isEnabled()){
+            if (!bluetooth.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                 int REQUEST_ENABLE_BT = 1;
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -50,20 +53,35 @@ public class MainActivity extends AppCompatActivity {
             //Retorna todos os dispositivos pareados com o aparelho.
             dispositivosPareados = bluetooth.getBondedDevices();
 
-            if ( dispositivosPareados.size() > 0 ) {
+            if (dispositivosPareados.size() > 0) {
                 for (BluetoothDevice item : dispositivosPareados) {
                     adapter.add(item.getName());
                 }
             }
         }
         spDispositivos.setAdapter(adapter);
-
-        }
     }
 
     public void enviar(View view) {
+        for(BluetoothDevice item : dispositivosPareados){
+            if (spDispositivos.getSelectedItem().toString().equalsIgnoreCase(item.getName())) {
 
 
+            }
+        }
 
+    }
+
+    private BluetoothSocket criarSoqueteBluetooth(BluetoothDevice dispositivo)
+            throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method metodo;
+        BluetoothSocket tmpSoquete = null;
+
+        try {
+            metodo = dispositivo.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
+            tmpSoquete = (BluetoothSocket) metodo.invoke(dispositivo, 1);
+        } finally {
+            return tmpSoquete;
+        }
     }
 }
