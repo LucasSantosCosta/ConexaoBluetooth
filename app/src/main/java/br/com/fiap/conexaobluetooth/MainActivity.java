@@ -62,10 +62,28 @@ public class MainActivity extends AppCompatActivity {
         spDispositivos.setAdapter(adapter);
     }
 
-    public void enviar(View view) {
+    public void enviar(View view) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         for(BluetoothDevice item : dispositivosPareados){
             if (spDispositivos.getSelectedItem().toString().equalsIgnoreCase(item.getName())) {
+                try{
+                    BluetoothDevice dispositivoRemoto = bluetooth.getRemoteDevice(item.getAddress());
+                    soquete = criarSoqueteBluetooth(dispositivoRemoto);
+                    soquete.connect();
 
+                    //Cancelar discovery(descoberta de novos dispositivos) assim que conectar
+                    bluetooth.cancelDiscovery();
+
+                    saida = soquete.getOutputStream();
+
+                    byte[] buffer = txtInformacao.getText().toString().getBytes();
+                    saida.write(buffer);
+                    saida.close();
+                    soquete.close();
+
+                }catch (IOException e){
+                    e.printStackTrace();
+
+                }
 
             }
         }
